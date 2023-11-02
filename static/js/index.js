@@ -27,6 +27,7 @@ class Letter {
         this.posX = x;
         this.posY = y;
         this.yVel = 0;
+        this.xVel = 0;
         this.timer = 0;
         this.delay = delay;
         this.color = "#f2f2f2";
@@ -45,16 +46,54 @@ class Letter {
             this.color = "#f2f2f2";
             this.rotation=0;
         }
-        let change = (0.95-this.size)/5;
+        if(this.posY<game.board.height-1 && !game.board[this.posX][this.posY+1]){
+            game.board[this.posX][this.posY] = null
+            this.posY += 1;
+            game.board[this.posX][this.posY] = this;
+            
+        }
+        let change = (0.95-this.size)/10;
         this.size += change;
         this.x -= change/2;
         this.y -= change/2;
         if(this.y<this.posY){
-            this.yVel+=0.01;
-            this.y+=this.yVel;
+            this.yVel+=0.003;
+            this.y+=this.yVel;         
             if(this.y>this.posY){
                 this.y = this.posY;
                 this.yVel = 0;
+            }else{
+                game.interactable = false;
+            }
+        }
+        if(this.y>this.posY){
+            this.yVel-=0.01;
+            this.y+=this.yVel;
+            if(this.y<this.posY){
+                this.y = this.posY;
+                this.yVel = 0;
+            }else{
+                game.interactable = false;
+            }
+        }
+        if(this.x<this.posX){
+            this.xVel+=0.01;
+            this.x+=this.xVel;
+            if(this.x>this.posX){
+                this.x = this.posX;
+                this.xVel = 0;
+            }else{
+                game.interactable = false;
+            }
+        }
+        if(this.x>this.posX){
+            this.xVel-=0.01;
+            this.x+=this.xVel;
+            if(this.x<this.posX){
+                this.x = this.posX;
+                this.xVel = 0;
+            }else{
+                game.interactable = false;
             }
         }
     }
@@ -62,6 +101,7 @@ class Letter {
 
 class Game {
     gameReady = false
+    lettersToAdd = []
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext("2d");
@@ -86,8 +126,10 @@ class Game {
         this.board = [];
         for(let x = 0;x<board.width;x++){
             this.board.push([])
+            this.lettersToAdd.push([]);
+            this.lettersToAdd[x].timer = 0;
             for(let y = 0;y<board.height;y++){
-                this.board[x].push(new Letter(board.board[x][y], x, y, (height-y-1)*200));
+                this.lettersToAdd[x].push(board.board[x][y])
             }
         }
         
@@ -97,16 +139,43 @@ class Game {
     }
     
     #newGame(){
-        this.#generateNewBoard(5, 6);
+        this.#generateNewBoard(8, 9);
     }
 
     async removePiece(x, y){
-        for(let i = y;i>0;i--){
-            this.board[x][i] = this.board[x][i-1];
-            this.board[x][i].posY += 1;
-        }
-        this.board[x][0] = new Letter("A", x, 0, 200);
+        this.board[x][y] = null;
+        let letter = await postData("/newLetter")
+        this.lettersToAdd[x].push(letter[0])
     }
+
+    async swapLetters(letter1, letter2){
+        let xDiff = Math.abs(letter1.posX-letter2.posX);
+        let yDiff = Math.abs(letter1.posY-letter2.posY)
+        if( xDiff == 1 && yDiff == 0 || xDiff == 0 && yDiff == 1){
+            let res = await postData("/swap", { x1: letter1.posX, y1: letter1.posY, x2: letter2.posX, y2: letter2.posY })
+            if(!res.canSwap){
+                return
+            }
+            
+            this.board[letter1.posX][letter1.posY] = letter2;
+            this.board[letter2.posX][letter2.posY] = letter1;
+            let pos1X = letter1.posX;
+            let pos1Y = letter1.posY;
+            letter1.posX = letter2.posX;
+            letter1.posY = letter2.posY;
+            letter2.posX = pos1X;
+            letter2.posY = pos1Y;
+            let word = ""
+            for( let i=0;i<res.changes.length;i++){
+                let x = res.changes[i][0];
+                let y = res.changes[i][1]
+                word += this.board[x][y].letter
+                this.removePiece(x, y)
+            }
+            console.log(word)
+        }
+    }
+
 
     updateTick(){
         if(!this.gameReady){
@@ -117,20 +186,55 @@ class Game {
         
         this.canvas.height = this.canvas.width*this.board.height/this.board.width;
         let boxSize = (this.canvas.width/this.board.width);
+        this.interactable = true;
+
+        //Add new letters from buffer
+        for(let i = 0; i<this.lettersToAdd.length;i++){
+            let letter = this.lettersToAdd[i]
+            if (!letter){
+                continue
+            }
+            this.lettersToAdd[i].timer += 20;
+            if(this.lettersToAdd[i].timer > 250 && letter.length>0 && !this.board[i][0]){
+                this.board[i][0] = new Letter(letter.shift(), i, 0);
+                this.lettersToAdd[i].timer = 0;
+            }
+        }
+
+        //Call each letter update function
         for(let x = 0;x<this.board.width;x++){
             for(let y = 0;y<this.board.height;y++){
                 let letter = this.board[x][y];
+                if (!letter){
+                    continue
+                }
                 let touching = this.mouseX > letter.x*boxSize && this.mouseX < letter.x*boxSize+boxSize*letter.size && this.mouseY > letter.y*boxSize && this.mouseY<letter.y*boxSize+boxSize*letter.size;
-                if(touching && this.mouseDown){
-                    this.removePiece(x, y);
-                    continue;
+                letter.updateTick(this, touching);
+            }
+        }
+
+        //Render each letter and handle swaping
+        for(let x = 0;x<this.board.width;x++){
+            for(let y = 0;y<this.board.height;y++){
+                let letter = this.board[x][y];
+                if (!letter){
+                    continue
+                }
+                let touching = this.mouseX > letter.x*boxSize && this.mouseX < letter.x*boxSize+boxSize*letter.size && this.mouseY > letter.y*boxSize && this.mouseY<letter.y*boxSize+boxSize*letter.size;
+                if(this.interactable && touching && this.mouseDown){
                     if(this.selected && this.selected.posX == letter.posX && this.selected.posY == letter.posY){
                         this.selected = null;
                     }else{
-                        this.selected = letter;
+                        if(this.selected){
+                            this.swapLetters(this.selected, letter);
+                            this.selected = null;
+                            this.interactable = false;
+                        }else{
+                            this.selected = letter;
+                        }
                     }
                 }
-                letter.updateTick(this, touching);
+                
                 ctx.fillStyle = letter.color;
                 ctx.translate(letter.x*boxSize, letter.y*boxSize);
                 ctx.fillRect(0, 0, boxSize*letter.size, boxSize*letter.size);
@@ -141,7 +245,7 @@ class Game {
                 ctx.resetTransform();
             }
         }
-
+        this.mouseDown = false;   
     }
 
     #clearCanvas(){
@@ -162,14 +266,14 @@ function main() {
         let rect = canvas.getBoundingClientRect();
         game.mouseX = (evt.touches[0].clientX - rect.left) / (rect.right - rect.left) * canvas.width;
         game.mouseY = (evt.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-    });
+    });/*
     addEventListener("mouseup", (evt) => {
         game.mouseDown = false;    
     });
     addEventListener("touchend", (evt) => {
         evt.preventDefault();
         game.mouseDown = false;    
-    });
+    });*/
     addEventListener("mousedown", (evt) => {
         game.mouseDown = true;
     });
