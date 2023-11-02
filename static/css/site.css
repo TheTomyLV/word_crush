@@ -1,0 +1,9 @@
+#gameCanvas {
+    width: 400px;
+    margin: 10px;
+}
+
+html {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }

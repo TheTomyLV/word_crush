@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/site.css')}}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/w3.css')}}">
+        <script
+        src="{{ url_for('static', filename='js/index.js') }}"
+        type="module"
+    ></script>
+    </head>
+
+    <body>
+        <div class="w3-bar w3-light-grey">
+            <a href="{{ url_for('home') }}" class="w3-bar-item w3-button">Spēle</a>
+            <a href="{{ url_for('rules') }}" class="w3-bar-item w3-button">Noteikumi</a>
+            <a href="{{ url_for('results') }}" class="w3-bar-item w3-button">Rezultāti</a>
+            <a href="{{ url_for('about') }}" class="w3-bar-item w3-button">Par</a>
+        </div>
+
+        <div class="body-content">
+            {% block content %}
+            {% endblock %}
+            <hr/>
+        </div>
+    </body>
+</html>
