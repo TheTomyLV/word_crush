@@ -137,8 +137,26 @@ def hasWordAt(game, x, y):
         game["board"] = board
         return changes
     
-def generateNewLetters(game):
-    return
+def fillBoard(game):
+    changes = []
+    for i in range(len(game["board"])):
+        changes.append(fillCollumn(game, i))
+    return changes
+
+def fillCollumn(game, x):
+    letters_added = []
+    board = game["board"]
+    while "" in board[x]:
+        if not board[x][0]:
+            board[x][0] = random.choice(letterPool)[0]
+            letters_added.append(board[x][0])
+        for y in range(len(board[x])):
+            letter = board[x][y]
+            if letter and y< len(board[x])-1 and not board[x][y+1]:
+               board[x][y+1] = letter
+               board[x][y] = ""
+    game["board"] = board
+    return letters_added
 
 @app.route('/newGame',methods = ['POST'])
 def newGame():
@@ -166,19 +184,13 @@ def swap():
         game = session.get('game')
         if not game:
             return {"canSwap": False}
-        swap_info = swapLetters(game, x1, y1, x2, y2)
-        if not swap_info:
+        removed = swapLetters(game, x1, y1, x2, y2)
+        if not removed:
             return {"canSwap": False}
-        generateNewLetters(game)
+        added = fillBoard(game)
         session['board'] = game
 
-        return {"canSwap": True, "changes": swap_info}
-
-@app.route('/newLetter',methods = ['POST'])
-def new_letter():
-    if request.method == 'POST':
-        args = request.get_json()
-        return random.choice(letterPool)
+        return {"canSwap": True, "removed": removed, "added": added}
 
 @app.route("/")
 def home():

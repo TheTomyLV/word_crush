@@ -128,7 +128,7 @@ class Game {
             this.board.push([])
             this.lettersToAdd.push([]);
             this.lettersToAdd[x].timer = 0;
-            for(let y = 0;y<board.height;y++){
+            for(let y = board.height-1;y>=0;y--){
                 this.lettersToAdd[x].push(board.board[x][y])
             }
         }
@@ -140,12 +140,6 @@ class Game {
     
     #newGame(){
         this.#generateNewBoard(8, 9);
-    }
-
-    async removePiece(x, y){
-        this.board[x][y] = null;
-        let letter = await postData("/newLetter")
-        this.lettersToAdd[x].push(letter[0])
     }
 
     async swapLetters(letter1, letter2){
@@ -166,11 +160,19 @@ class Game {
             letter2.posX = pos1X;
             letter2.posY = pos1Y;
             let word = ""
-            for( let i=0;i<res.changes.length;i++){
-                let x = res.changes[i][0];
-                let y = res.changes[i][1]
-                word += this.board[x][y].letter
-                this.removePiece(x, y)
+            console.log(res)
+            for( let i=0;i<res.removed.length;i++){
+                let x = res.removed[i][0];
+                let y = res.removed[i][1];
+                word += this.board[x][y].letter;
+                
+                this.board[x][y] = null;
+            }
+            for(let i = 0;i<res.added.length;i++){
+                for(let j in res.added[i]){
+                    this.lettersToAdd[i].push(res.added[i][j])
+                }
+                
             }
             console.log(word)
         }
