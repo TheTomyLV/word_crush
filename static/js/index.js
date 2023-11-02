@@ -1,3 +1,23 @@
+
+async function postData(url = "", data = {}) {
+    // Default options are marked with *
+    const response = await fetch(url, {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      redirect: "follow", // manual, *follow, error
+      referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(data), // body data type must match "Content-Type" header
+    });
+    return response.json(); // parses JSON response into native JavaScript objects
+  }
+
+
 class Letter {
     constructor(letter, x, y, delay=0){
         this.letter = letter;
@@ -41,7 +61,7 @@ class Letter {
 }
 
 class Game {
-    avalableLetters = ["a", "b", "c", "d", "e", "f", "g"]
+    gameReady = false
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext("2d");
@@ -57,33 +77,41 @@ class Game {
         };
     }
 
-    #generateNewBoard(width, height){
+    async #generateNewBoard(width, height){
+        let board = await postData("/newGame", { width: width, height: height })
+        if(!board){
+            return
+        }
+
         this.board = [];
-        for(let x = 0;x<width;x++){
+        for(let x = 0;x<board.width;x++){
             this.board.push([])
-            for(let y = 0;y<height;y++){
-                this.board[x].push(new Letter(this.avalableLetters[Math.floor(Math.random()*this.avalableLetters.length)], x, y, (height-y-1)*200));
+            for(let y = 0;y<board.height;y++){
+                this.board[x].push(new Letter(board.board[x][y], x, y, (height-y-1)*200));
             }
         }
         
-        this.board.width = width;
-        this.board.height = height;
+        this.board.width = board.width;
+        this.board.height = board.height;
+        this.gameReady = true
     }
     
     #newGame(){
         this.#generateNewBoard(5, 6);
-        
     }
 
-    removePiece(x, y){
+    async removePiece(x, y){
         for(let i = y;i>0;i--){
             this.board[x][i] = this.board[x][i-1];
             this.board[x][i].posY += 1;
         }
-        this.board[x][0] = new Letter(this.avalableLetters[Math.floor(Math.random()*this.avalableLetters.length)], x, 0, 200);
+        this.board[x][0] = new Letter("A", x, 0, 200);
     }
 
     updateTick(){
+        if(!this.gameReady){
+            return
+        }
         this.#clearCanvas();
         let ctx = this.ctx;
         
