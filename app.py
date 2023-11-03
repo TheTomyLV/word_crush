@@ -52,13 +52,26 @@ f = open('static/words.json', encoding="utf8")
 words = json.load(f)
 f.close()
 
+def newLetter(game):
+    if not game["word"]:
+        word =""
+        while len(word) != 9:
+            word = random.choice(words)
+        game["word"] = word
+    letter = game["word"][0]
+    game["word"] = game["word"][1:]
+    return letter
+    
+
 def generateBoard(width, height):
     board = []
+    game = {}
+    game["word"] = ""
     for i in range(width):
         board.append([])
         for j in range(height):
-            board[i].append(random.choice(letterPool)[0])
-    game = {}
+            board[i].append(newLetter(game))
+    
     game["width"] = width
     game["height"] = height
     game["movesLeft"] = 30
@@ -132,8 +145,8 @@ def hasWordAt(game, x, y):
     diagonal = hasWord(diagonal)
     if diagonal != -1:
         for i in range(diagonal[1]):
-            board[diagonal[0]+i][diagonal[0]+i] = ""
-            changes.append([diagonal[0]+i, diagonal[0]+i])
+            changes.append([x-minValue+diagonal[0]+i, y-minValue+diagonal[0]+i])
+            board[x-minValue+diagonal[0]+i][y-minValue+diagonal[0]+i] = ""
         game["board"] = board
         return changes
     
@@ -148,7 +161,7 @@ def fillCollumn(game, x):
     board = game["board"]
     while "" in board[x]:
         if not board[x][0]:
-            board[x][0] = random.choice(letterPool)[0]
+            board[x][0] = newLetter(game)
             letters_added.append(board[x][0])
         for y in range(len(board[x])):
             letter = board[x][y]

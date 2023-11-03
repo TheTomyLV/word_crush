@@ -32,6 +32,7 @@ class Letter {
         this.delay = delay;
         this.color = "#f2f2f2";
         this.rotation = 0;
+        this.speed = 0.005;
     }
 
     updateTick(game, mouseOver){
@@ -57,7 +58,7 @@ class Letter {
         this.x -= change/2;
         this.y -= change/2;
         if(this.y<this.posY){
-            this.yVel+=0.003;
+            this.yVel+=this.speed;
             this.y+=this.yVel;         
             if(this.y>this.posY){
                 this.y = this.posY;
@@ -67,7 +68,7 @@ class Letter {
             }
         }
         if(this.y>this.posY){
-            this.yVel-=0.01;
+            this.yVel-=this.speed;
             this.y+=this.yVel;
             if(this.y<this.posY){
                 this.y = this.posY;
@@ -77,7 +78,7 @@ class Letter {
             }
         }
         if(this.x<this.posX){
-            this.xVel+=0.01;
+            this.xVel+=this.speed;
             this.x+=this.xVel;
             if(this.x>this.posX){
                 this.x = this.posX;
@@ -87,7 +88,7 @@ class Letter {
             }
         }
         if(this.x>this.posX){
-            this.xVel-=0.01;
+            this.xVel-=this.speed;
             this.x+=this.xVel;
             if(this.x<this.posX){
                 this.x = this.posX;
@@ -140,6 +141,7 @@ class Game {
     
     #newGame(){
         this.#generateNewBoard(8, 9);
+        this.deletedLetters = []
     }
 
     async swapLetters(letter1, letter2){
@@ -151,21 +153,29 @@ class Game {
                 return
             }
             
-            this.board[letter1.posX][letter1.posY] = letter2;
-            this.board[letter2.posX][letter2.posY] = letter1;
             let pos1X = letter1.posX;
             let pos1Y = letter1.posY;
             letter1.posX = letter2.posX;
             letter1.posY = letter2.posY;
             letter2.posX = pos1X;
             letter2.posY = pos1Y;
+            this.board[letter2.posX][letter2.posY] = letter2;
+            this.board[letter1.posX][letter1.posY] = letter1;
+            console.log(letter1)
+            console.log(letter2)
             let word = ""
             console.log(res)
+            this.deletedLetters = []
             for( let i=0;i<res.removed.length;i++){
                 let x = res.removed[i][0];
                 let y = res.removed[i][1];
                 word += this.board[x][y].letter;
                 
+                let letter = this.board[x][y]
+                letter.posX = i;
+                letter.posY = this.board.height+0.5;
+                letter.speed = 0.02;
+                this.deletedLetters.push(letter)
                 this.board[x][y] = null;
             }
             for(let i = 0;i<res.added.length;i++){
@@ -175,6 +185,7 @@ class Game {
                 
             }
             console.log(word)
+            console.log(this.board)
         }
     }
 
@@ -186,7 +197,7 @@ class Game {
         this.#clearCanvas();
         let ctx = this.ctx;
         
-        this.canvas.height = this.canvas.width*this.board.height/this.board.width;
+        this.canvas.height = this.canvas.width*(this.board.height+1)/this.board.width+30;
         let boxSize = (this.canvas.width/this.board.width);
         this.interactable = true;
 
@@ -214,6 +225,8 @@ class Game {
                 letter.updateTick(this, touching);
             }
         }
+
+        
 
         //Render each letter and handle swaping
         for(let x = 0;x<this.board.width;x++){
@@ -243,10 +256,26 @@ class Game {
                 ctx.fillStyle = "black";
                 ctx.font = `${letter.size*boxSize}px serif`;
                 ctx.fillText(letter.letter, (letter.size/2-0.1)*boxSize, (letter.size/2+0.25)*boxSize)
-                ctx.stroke();
                 ctx.resetTransform();
             }
         }
+
+        //Render guessed letters
+        for(let i = 0; i<this.deletedLetters.length;i++){
+            let letter = this.deletedLetters[i]
+            if (!letter){
+                continue
+            }
+            letter.updateTick(this, false);
+            ctx.fillStyle = letter.color;
+            ctx.translate(letter.x*boxSize, letter.y*boxSize);
+            ctx.fillRect(0, 0, boxSize*letter.size, boxSize*letter.size);
+            ctx.fillStyle = "black";
+            ctx.font = `${letter.size*boxSize}px serif`;
+            ctx.fillText(letter.letter, (letter.size/2-0.1)*boxSize, (letter.size/2+0.25)*boxSize)
+            ctx.resetTransform();
+        }
+
         this.mouseDown = false;   
     }
 
