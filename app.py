@@ -74,7 +74,8 @@ def generateBoard(width, height):
     
     game["width"] = width
     game["height"] = height
-    game["movesLeft"] = 30
+    game["moves"] = 30
+    game["points"] = 0
 
     if not hasValidMoves():
         board = generateBoard()
@@ -128,25 +129,32 @@ def hasWordAt(game, x, y):
         diagonal += board[x-minValue+i][y-minValue+i]
 
     changes = []
+    score = 0
     horizontal = hasWord(horizontal)
     if horizontal != -1:
         for i in range(horizontal[1]):
+            score += letter_posibilities[board[horizontal[0]+i][y]]["points"]
             board[horizontal[0]+i][y] = ""
             changes.append([horizontal[0]+i, y])
+        game["points"] += score
         game["board"] = board
         return changes
     vertical = hasWord(vertical)
     if vertical != -1:
         for i in range(vertical[1]):
+            score += letter_posibilities[board[x][vertical[0]+i]]["points"]
             board[x][vertical[0]+i] = ""
             changes.append([x, vertical[0]+i])
+        game["points"] += score
         game["board"] = board
         return changes
     diagonal = hasWord(diagonal)
     if diagonal != -1:
         for i in range(diagonal[1]):
             changes.append([x-minValue+diagonal[0]+i, y-minValue+diagonal[0]+i])
+            score += letter_posibilities[board[x-minValue+diagonal[0]+i][y-minValue+diagonal[0]+i]]["points"]
             board[x-minValue+diagonal[0]+i][y-minValue+diagonal[0]+i] = ""
+        game["points"] += score
         game["board"] = board
         return changes
     
@@ -179,7 +187,7 @@ def newGame():
         width = args["width"]
         height = args["height"]
         game = generateBoard(width, height)
-
+        
         session['type'] = type
         session['game'] = game
 
@@ -200,18 +208,25 @@ def swap():
         removed = swapLetters(game, x1, y1, x2, y2)
         if not removed:
             return {"canSwap": False}
+        game["moves"] -= 1
         added = fillBoard(game)
         session['board'] = game
 
-        return {"canSwap": True, "removed": removed, "added": added}
+        return {"canSwap": True, "removed": removed, "added": added, "points": game["points"], "moves": game["moves"]}
 
 @app.route("/")
 def home():
-    return render_template("game.html")
+    game = session.get('game')
+    if not game:
+        return render_template("game.html", points = 0)
+    return render_template("game.html", points = game['points'], moves = game['moves'])
 
 @app.route("/game/")
 def game():
-    return render_template("game.html")
+    game = session.get('game')
+    if not game:
+        return render_template("game.html", points = 0)
+    return render_template("game.html", points = game['points'], moves = game['moves'])
 
 @app.route("/about/")
 def about():
@@ -224,4 +239,3 @@ def results():
 @app.route("/rules/")
 def rules():
     return render_template("rules.html")
-

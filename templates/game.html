@@ -4,6 +4,8 @@ Spēle
 {% endblock %}
 {% block content %}
 <div class="w3-container w3-center">
+    <p class="w3-cursive">Punkti: <span id="points">{{points}}</span></p>
+    <p class="w3-cursive">Gājieni: <span id="moves">{{moves}}</span></p>
     <canvas id="gameCanvas"></canvas>
 </div>
 {% endblock %}

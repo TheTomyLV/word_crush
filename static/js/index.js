@@ -22,17 +22,19 @@ class Letter {
     constructor(letter, x, y, delay=0){
         this.letter = letter;
         this.size = 0;
-        this.x = x+0.475;
+        this.x = x;
         this.y = 0.475;
         this.posX = x;
         this.posY = y;
         this.yVel = 0;
         this.xVel = 0;
+        this.retX = null;
+        this.retY = null;
         this.timer = 0;
         this.delay = delay;
-        this.color = "#f2f2f2";
+        this.color = "#D2E9E9";
         this.rotation = 0;
-        this.speed = 0.005;
+        this.speed = 0.01;
     }
 
     updateTick(game, mouseOver){
@@ -40,12 +42,18 @@ class Letter {
         if(this.delay>this.timer){
             return;
         }
-        if(mouseOver || game.selected && game.selected.posX == this.posX && game.selected.posY == this.posY){
-            this.color = "#fafafa";
-            //this.rotation = Math.sin(new Date().getTime()/100);
-        }else{
-            this.color = "#f2f2f2";
+        if(game.selected && game.selected.posX == this.posX && game.selected.posY == this.posY){
+            this.color = "#C4DFDF";
+            this.size += (1-this.size)/10;
+            this.rotation = Math.sin(this.timer/50)/20;
+        }else if(mouseOver){
+            this.color = "#C4DFDF";
             this.rotation=0;
+            this.size += (1-this.size)/10;
+        }else{
+            this.color = "#D2E9E9";
+            this.rotation=0;
+            this.size += (0.95-this.size)/10;
         }
         if(this.posY<game.board.height-1 && !game.board[this.posX][this.posY+1]){
             game.board[this.posX][this.posY] = null
@@ -53,16 +61,17 @@ class Letter {
             game.board[this.posX][this.posY] = this;
             
         }
-        let change = (0.95-this.size)/10;
-        this.size += change;
-        this.x -= change/2;
-        this.y -= change/2;
+        
         if(this.y<this.posY){
             this.yVel+=this.speed;
             this.y+=this.yVel;         
             if(this.y>this.posY){
                 this.y = this.posY;
                 this.yVel = 0;
+                if(this.retX != null)this.posX = this.retX;
+                if(this.retY != null)this.posY = this.retY;
+                this.retX = null;
+                this.retY = null;
             }else{
                 game.interactable = false;
             }
@@ -73,6 +82,10 @@ class Letter {
             if(this.y<this.posY){
                 this.y = this.posY;
                 this.yVel = 0;
+                if(this.retX != null)this.posX = this.retX;
+                if(this.retY != null)this.posY = this.retY;
+                this.retX = null;
+                this.retY = null;
             }else{
                 game.interactable = false;
             }
@@ -83,6 +96,10 @@ class Letter {
             if(this.x>this.posX){
                 this.x = this.posX;
                 this.xVel = 0;
+                if(this.retX != null)this.posX = this.retX;
+                if(this.retY != null)this.posY = this.retY;
+                this.retX = null;
+                this.retY = null;
             }else{
                 game.interactable = false;
             }
@@ -93,6 +110,10 @@ class Letter {
             if(this.x<this.posX){
                 this.x = this.posX;
                 this.xVel = 0;
+                if(this.retX != null)this.posX = this.retX;
+                if(this.retY != null)this.posY = this.retY;
+                this.retX = null;
+                this.retY = null;
             }else{
                 game.interactable = false;
             }
@@ -140,7 +161,7 @@ class Game {
     }
     
     #newGame(){
-        this.#generateNewBoard(8, 9);
+        this.#generateNewBoard(10, 12);
         this.deletedLetters = []
     }
 
@@ -149,9 +170,6 @@ class Game {
         let yDiff = Math.abs(letter1.posY-letter2.posY)
         if( xDiff == 1 && yDiff == 0 || xDiff == 0 && yDiff == 1){
             let res = await postData("/swap", { x1: letter1.posX, y1: letter1.posY, x2: letter2.posX, y2: letter2.posY })
-            if(!res.canSwap){
-                return
-            }
             
             let pos1X = letter1.posX;
             let pos1Y = letter1.posY;
@@ -159,12 +177,23 @@ class Game {
             letter1.posY = letter2.posY;
             letter2.posX = pos1X;
             letter2.posY = pos1Y;
+            if(!res.canSwap){
+                let pos1X = letter1.posX;
+                let pos1Y = letter1.posY;
+                letter1.retX = letter2.posX;
+                letter1.retY = letter2.posY;
+                letter2.retX = pos1X;
+                letter2.retY = pos1Y;
+                return
+            }
             this.board[letter2.posX][letter2.posY] = letter2;
             this.board[letter1.posX][letter1.posY] = letter1;
-            console.log(letter1)
-            console.log(letter2)
+
+            let points = document.getElementById("points")
+            points.innerHTML = res.points;
+            let moves = document.getElementById("moves")
+            moves.innerHTML = res.moves;
             let word = ""
-            console.log(res)
             this.deletedLetters = []
             for( let i=0;i<res.removed.length;i++){
                 let x = res.removed[i][0];
@@ -184,9 +213,22 @@ class Game {
                 }
                 
             }
-            console.log(word)
-            console.log(this.board)
         }
+    }
+
+    drawLetter(letter, boxSize){
+        let ctx = this.ctx;
+        ctx.fillStyle = letter.color;
+        ctx.translate((letter.x+0.475)*boxSize, (letter.y+0.475)*boxSize);
+        ctx.rotate( letter.rotation );
+        ctx.translate( -letter.size/2*boxSize, -letter.size/2*boxSize );
+        ctx.beginPath();
+        ctx.roundRect(0, 0, boxSize*letter.size, boxSize*letter.size, 5)
+        ctx.fill()
+        ctx.fillStyle = "black";
+        ctx.font = `${letter.size*boxSize}px serif`;
+        ctx.fillText(letter.letter, (letter.size/2-0.2)*boxSize, (letter.size/2+0.25)*boxSize)
+        ctx.resetTransform();
     }
 
 
@@ -195,7 +237,6 @@ class Game {
             return
         }
         this.#clearCanvas();
-        let ctx = this.ctx;
         
         this.canvas.height = this.canvas.width*(this.board.height+1)/this.board.width+30;
         let boxSize = (this.canvas.width/this.board.width);
@@ -208,7 +249,7 @@ class Game {
                 continue
             }
             this.lettersToAdd[i].timer += 20;
-            if(this.lettersToAdd[i].timer > 250 && letter.length>0 && !this.board[i][0]){
+            if(this.lettersToAdd[i].timer > 150 && letter.length>0 && !this.board[i][0]){
                 this.board[i][0] = new Letter(letter.shift(), i, 0);
                 this.lettersToAdd[i].timer = 0;
             }
@@ -225,8 +266,6 @@ class Game {
                 letter.updateTick(this, touching);
             }
         }
-
-        
 
         //Render each letter and handle swaping
         for(let x = 0;x<this.board.width;x++){
@@ -250,13 +289,7 @@ class Game {
                     }
                 }
                 
-                ctx.fillStyle = letter.color;
-                ctx.translate(letter.x*boxSize, letter.y*boxSize);
-                ctx.fillRect(0, 0, boxSize*letter.size, boxSize*letter.size);
-                ctx.fillStyle = "black";
-                ctx.font = `${letter.size*boxSize}px serif`;
-                ctx.fillText(letter.letter, (letter.size/2-0.1)*boxSize, (letter.size/2+0.25)*boxSize)
-                ctx.resetTransform();
+                this.drawLetter(letter,boxSize)
             }
         }
 
@@ -267,13 +300,7 @@ class Game {
                 continue
             }
             letter.updateTick(this, false);
-            ctx.fillStyle = letter.color;
-            ctx.translate(letter.x*boxSize, letter.y*boxSize);
-            ctx.fillRect(0, 0, boxSize*letter.size, boxSize*letter.size);
-            ctx.fillStyle = "black";
-            ctx.font = `${letter.size*boxSize}px serif`;
-            ctx.fillText(letter.letter, (letter.size/2-0.1)*boxSize, (letter.size/2+0.25)*boxSize)
-            ctx.resetTransform();
+            this.drawLetter(letter,boxSize)
         }
 
         this.mouseDown = false;   

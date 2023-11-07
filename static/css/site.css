@@ -6,4 +6,9 @@
 html {
     overflow: hidden;
     overscroll-behavior: none;
+    
   }
+
+body{
+    background-color: #F8F6F4;
+}
