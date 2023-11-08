@@ -4,4 +4,25 @@ Rezultāti
 {% endblock %}
 {% block content %}
 <p>Rezultāti</p>
+<div class="w3-container">
+    <h2>Right Align a Column</h2>
+  
+    <table class="w3-table-all">
+    <thead>
+        <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th class="w3-right-align">Points</th>
+      </tr>
+    </thead>
+        {% for results in result %}
+        <tr>
+            <th>{{results.vards}}</th>
+            <th>Last Name</th>
+            <th class="w3-right-align">{{results.punkti}}</th>
+        </tr>
+        {% endfor %}
+    </table>
+  </div>
+
 {% endblock %}

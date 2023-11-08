@@ -209,6 +209,9 @@ def swap():
         if not removed:
             return {"canSwap": False}
         game["moves"] -= 1
+        # if (game["moves"]==0){                    Game end here
+        #     gameEnd()
+        # }
         added = fillBoard(game)
         session['board'] = game
 
@@ -234,7 +237,10 @@ def about():
 
 @app.route("/results/")
 def results():
-    return render_template("results.html")
+    f = open('static/results.json', encoding="utf8")
+    result = json.load(f)
+    f.close()
+    return render_template("results.html", result=result)
 
 @app.route("/rules/")
 def rules():
