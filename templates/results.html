@@ -11,15 +11,13 @@ Rezultāti
     <thead>
         <tr>
         <th>First Name</th>
-        <th>Last Name</th>
         <th class="w3-right-align">Points</th>
       </tr>
     </thead>
         {% for results in result %}
         <tr>
-            <th>{{results.vards}}</th>
-            <th>Last Name</th>
-            <th class="w3-right-align">{{results.punkti}}</th>
+            <td>{{results.vards}}</td>
+            <td class="w3-right-align">{{results.punkti}}</td>
         </tr>
         {% endfor %}
     </table>
