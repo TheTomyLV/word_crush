@@ -215,7 +215,7 @@ def swap():
         added = fillBoard(game)
         session['board'] = game
 
-        return {"canSwap": True, "removed": removed, "added": added, "points": game["points"], "moves": game["moves"]}
+        return {"canSwap": True, "removed": removed, "added": added, "points": game["points"], "moves": game["moves"], "gameEnded":game["moves"]==0}
 
 @app.route("/")
 def home():

@@ -3,9 +3,21 @@
 Spēle
 {% endblock %}
 {% block content %}
-<div class="w3-container w3-center">
+<script>
+    function displayGame(){
+        if(document.getElementById("playerName").value.length>2){
+            document.getElementById("gameSpace").style.display = "block";
+            document.getElementById("startDiv").style.display = "none";
+        }
+    }
+</script>
+<div class="w3-container w3-center" style="display: none" id="gameSpace">
     <p class="w3-cursive">Punkti: <span id="points">{{points}}</span></p>
     <p class="w3-cursive">Gājieni: <span id="moves">{{moves}}</span></p>
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas" class="w3-center"></canvas>
+</div>
+<div id="startDiv" class="w3-container w3-center">
+    <input id="playerName"></input>
+    <button id="start" onclick="displayGame()">Start</button>
 </div>
 {% endblock %}

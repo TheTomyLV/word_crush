@@ -347,5 +347,4 @@ function main() {
       }, 20);
       
   }
-  
   main();

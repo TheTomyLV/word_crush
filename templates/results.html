@@ -5,17 +5,17 @@ Rezultāti
 {% block content %}
 <p>Rezultāti</p>
 <div class="w3-container">
-    <h2>Right Align a Column</h2>
-  
     <table class="w3-table-all">
     <thead>
-        <tr>
-        <th>First Name</th>
+      <tr>
+        <th>Place</th>
+        <th>Name</th>
         <th class="w3-right-align">Points</th>
       </tr>
     </thead>
         {% for results in result %}
         <tr>
+            <th>{{loop.index}}.</th>
             <td>{{results.vards}}</td>
             <td class="w3-right-align">{{results.punkti}}</td>
         </tr>
