@@ -8,8 +8,9 @@ Rezultāti
     <table class="w3-table-all">
     <thead>
       <tr>
-        <th>Place</th>
-        <th>Name</th>
+        <th>Vieta</th>
+        <th>Vārds</th>
+        <th>Laiks</th>
         <th class="w3-right-align">Points</th>
       </tr>
     </thead>
@@ -17,6 +18,7 @@ Rezultāti
         <tr>
             <th>{{loop.index}}.</th>
             <td>{{results.vards}}</td>
+            <td>{{results.laiks}}</td>
             <td class="w3-right-align">{{results.punkti}}</td>
         </tr>
         {% endfor %}

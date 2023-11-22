@@ -162,7 +162,7 @@ class Game {
     }
     
     #newGame(){
-        this.#generateNewBoard(10, 12);
+        this.#generateNewBoard(parseInt(document.getElementById("optionThick").value), parseInt(document.getElementById("optionHeight").value));
         this.deletedLetters = []
     }
 
