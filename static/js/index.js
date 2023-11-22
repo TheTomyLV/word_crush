@@ -141,7 +141,6 @@ class Game {
 
     async #generateNewBoard(width, height){
         let name = document.getElementById("playerName").value;
-        for(let i=0;i<100;i++) console.log(name);
         let board = await postData("/newGame", { width: width, height: height, username: name })
         if(!board){
             return
