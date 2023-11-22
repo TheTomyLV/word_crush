@@ -74,7 +74,7 @@ def generateBoard(width, height):
     
     game["width"] = width
     game["height"] = height
-    game["moves"] = 30
+    game["moves"] = 2
     game["points"] = 0
 
     if not hasValidMoves():
@@ -179,6 +179,16 @@ def fillCollumn(game, x):
     game["board"] = board
     return letters_added
 
+def saveScore(game):
+    f = open('static/results.json', 'r')
+    results = json.load(f)
+    results.append({"vards": game["username"], "punkti": game["points"]})
+    f.close()
+    results = sorted(results, key=lambda d: d['punkti'], reverse=True) 
+    f = open('static/results.json', 'w')
+    json.dump(results, f)
+    f.close()
+
 @app.route('/newGame',methods = ['POST'])
 def newGame():
     if request.method == 'POST':
@@ -187,6 +197,7 @@ def newGame():
         width = args["width"]
         height = args["height"]
         game = generateBoard(width, height)
+        game["username"] = args["username"]
         
         session['type'] = type
         session['game'] = game
@@ -209,9 +220,8 @@ def swap():
         if not removed:
             return {"canSwap": False}
         game["moves"] -= 1
-        # if (game["moves"]==0){                    Game end here
-        #     gameEnd()
-        # }
+        if (game["moves"]==0):
+            saveScore(game)
         added = fillBoard(game)
         session['board'] = game
 

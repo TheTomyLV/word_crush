@@ -140,7 +140,7 @@ class Game {
     }
 
     async #generateNewBoard(width, height){
-        let board = await postData("/newGame", { width: width, height: height })
+        let board = await postData("/newGame", { width: width, height: height, username: "Toms" })
         if(!board){
             return
         }
