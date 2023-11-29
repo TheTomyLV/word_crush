@@ -18,6 +18,14 @@ async function postData(url = "", data = {}) {
   }
 
 
+function endGame(){
+    document.getElementById("gameSpace").style.display = "none";
+    document.getElementById("startDiv").style.display = "block";
+    document.getElementById("playerName").value = "";
+    clearInterval();
+}
+
+
 class Letter {
     constructor(letter, x, y, delay=0){
         this.letter = letter;
@@ -171,7 +179,9 @@ class Game {
         let yDiff = Math.abs(letter1.posY-letter2.posY)
         if( xDiff == 1 && yDiff == 0 || xDiff == 0 && yDiff == 1){
             let res = await postData("/swap", { x1: letter1.posX, y1: letter1.posY, x2: letter2.posX, y2: letter2.posY })
-            
+            if(res.gameEnded){
+                endGame();
+            }
             let pos1X = letter1.posX;
             let pos1Y = letter1.posY;
             letter1.posX = letter2.posX;
