@@ -192,7 +192,7 @@ def saveScore(game):
         seconds = "0"+str(seconds)
     f = open('static/results.json', 'r')
     results = json.load(f)
-    results.append({"vards": game["username"], "punkti": game["points"], "time": time.time()-game["time"], "displayTime": minutes+":"+seconds})
+    results.append({"vards": game["username"], "punkti": game["points"], "time": time.time()-game["time"], "displayTime": str(minutes)+":"+str(seconds)})
     f.close()
     results = sorted(results, key=lambda d: d['punkti'], reverse=True) 
     f = open('static/results.json', 'w')

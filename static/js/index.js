@@ -1,4 +1,10 @@
 
+window.clearAllInterval = function(){
+    while(intervalIds.length){
+      window.clearInterval(intervalIds.pop());
+    }
+  }
+
 async function postData(url = "", data = {}) {
     // Default options are marked with *
     const response = await fetch(url, {
@@ -19,10 +25,12 @@ async function postData(url = "", data = {}) {
 
 
 function endGame(){
-    document.getElementById("gameSpace").style.display = "none";
+    let gameSpace = document.getElementById("gameSpace");
+    gameSpace.style.display = "none";
     document.getElementById("startDiv").style.display = "block";
     document.getElementById("playerName").value = "";
-    clearInterval();
+    gameSpace.replaceWith(gameSpace.cloneNode(true));
+    window.clearAllInterval();
 }
 
 
@@ -368,7 +376,6 @@ function main() {
         game.mouseDown = true;    
     });
     let intervalId = setInterval(function() {
-        
         game.updateTick();
       }, 20);
       
