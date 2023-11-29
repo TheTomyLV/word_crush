@@ -1,3 +1,15 @@
+window.intervalIds = [];
+
+//origianl interval function
+const originalIntervalFn = window.setInterval;
+
+//overriding the origianl
+window.setInterval = function(fn, delay){
+  const id = originalIntervalFn(fn, delay);
+  //storing the id of each interval
+  intervalIds.push(id);
+  return id;
+}
 
 window.clearAllInterval = function(){
     while(intervalIds.length){
