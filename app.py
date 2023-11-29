@@ -10,6 +10,8 @@ import secrets
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32)
 
+DEFAULT_MOVE_COUNT = 3
+
 letter_posibilities = {
     "a": {"probability": 11, "points": 1},
     "ā": {"probability": 4, "points": 2},
@@ -76,7 +78,7 @@ def generateBoard(width, height):
     
     game["width"] = width
     game["height"] = height
-    game["moves"] = 2
+    game["moves"] = DEFAULT_MOVE_COUNT
     game["points"] = 0
     game["time"] = time.time()
 
@@ -241,14 +243,14 @@ def swap():
 def home():
     game = session.get('game')
     if not game:
-        return render_template("game.html", points = 0)
+        return render_template("game.html", points = 0, moves=DEFAULT_MOVE_COUNT)
     return render_template("game.html", points = game['points'], moves = game['moves'], startTime=game["time"])
 
 @app.route("/game/")
 def game():
     game = session.get('game')
     if not game:
-        return render_template("game.html", points = 0)
+        return render_template("game.html", points = 0, moves=DEFAULT_MOVE_COUNT)
     return render_template("game.html", points = game['points'], moves = game['moves'], startTime=game["time"])
 
 @app.route("/about/")
