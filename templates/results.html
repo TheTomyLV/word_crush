@@ -8,16 +8,14 @@ Rezultāti
     <table class="w3-table-all">
     <thead>
       <tr>
-        <th>Vieta</th>
-        <th>Vārds</th>
+        <th>Vieta, Vārds</th>
         <th>Laiks</th>
         <th class="w3-right-align">Points</th>
       </tr>
     </thead>
         {% for results in result %}
         <tr>
-            <th>{{loop.index}}.</th>
-            <td>{{results.vards}}</td>
+            <td><b>{{loop.index}}.</b> {{results.vards}}</td>
             <td>{{results.displayTime}}</td>
             <td class="w3-right-align">{{results.punkti}}</td>
         </tr>

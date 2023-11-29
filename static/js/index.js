@@ -34,17 +34,17 @@ async function postData(url = "", data = {}) {
     });
     return response.json(); // parses JSON response into native JavaScript objects
   }
-
-
-function endGame(){
+  
+async function endGame() {
+    setTimeout(() => {
     let gameSpace = document.getElementById("gameSpace");
     gameSpace.style.display = "none";
     document.getElementById("startDiv").style.display = "block";
     document.getElementById("playerName").value = "";
     gameSpace.replaceWith(gameSpace.cloneNode(true));
     window.clearAllInterval();
+    }, 3000);
 }
-
 
 class Letter {
     constructor(letter, x, y, delay=0){
