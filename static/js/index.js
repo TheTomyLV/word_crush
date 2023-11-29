@@ -35,9 +35,19 @@ class Letter {
         this.color = "#D2E9E9";
         this.rotation = 0;
         this.speed = 0.01;
+        
     }
 
     updateTick(game, mouseOver){
+        let minutes = Math.floor(this.timer/1000/60);
+        let seconds = Math.floor(this.timer/1000)%60;
+        if(seconds.toString().length == 1){
+            seconds = "0"+seconds;
+        }
+        if(minutes.toString().length == 1){
+            minutes = "0"+minutes;
+        }
+        timer.innerHTML = minutes+":"+seconds;
         this.timer += 20;
         if(this.delay>this.timer){
             return;
@@ -125,6 +135,7 @@ class Game {
     gameReady = false
     lettersToAdd = []
     constructor(canvas) {
+        
         this.canvas = canvas;
         this.ctx = this.canvas.getContext("2d");
         this.#newGame()
@@ -147,6 +158,7 @@ class Game {
         }
 
         this.board = [];
+        this.timer = board.time;
         for(let x = 0;x<board.width;x++){
             this.board.push([])
             this.lettersToAdd.push([]);
@@ -162,6 +174,7 @@ class Game {
     }
     
     #newGame(){
+        this.timer = 0;
         this.#generateNewBoard(parseInt(document.getElementById("optionThick").value), parseInt(document.getElementById("optionHeight").value));
         this.deletedLetters = []
     }
@@ -234,6 +247,8 @@ class Game {
 
 
     updateTick(){
+        let timer = document.getElementById("timer")
+        this.timer += 20;
         if(!this.gameReady){
             return
         }

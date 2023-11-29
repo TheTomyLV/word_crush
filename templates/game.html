@@ -13,6 +13,7 @@ Spēle
     }
 </script>
 <div class="w3-container w3-center" style="display: none" id="gameSpace">
+    <p>Time: <span id="timer">00:00</span></p>
     <p class="w3-cursive">Punkti: <span id="points">{{points}}</span></p>
     <p class="w3-cursive">Gājieni: <span id="moves">{{moves}}</span></p>
     <canvas id="gameCanvas" class="w3-center"></canvas>
@@ -20,6 +21,7 @@ Spēle
 <div id="startDiv" class="w3-container w3-center">
     <input id="playerName"></input>
     <button id="start" onclick="displayGame()">Start</button>
+    
     <div class="slidecontainer">
         <label>Laukuma garums:</label>
         <input type="range" value="12" min="12" max="20" id="optionHeight" oninput="this.nextElementSibling.value = this.value">

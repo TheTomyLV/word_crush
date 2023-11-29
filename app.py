@@ -2,6 +2,8 @@ import json
 import random
 import re
 from datetime import datetime
+import time
+import math
 
 from flask import Flask, redirect, url_for, request, render_template, session
 import secrets
@@ -76,6 +78,7 @@ def generateBoard(width, height):
     game["height"] = height
     game["moves"] = 2
     game["points"] = 0
+    game["time"] = time.time()
 
     if not hasValidMoves():
         board = generateBoard()
@@ -180,9 +183,16 @@ def fillCollumn(game, x):
     return letters_added
 
 def saveScore(game):
+    timer = time.time()-game["time"]
+    minutes = math.floor(timer/60)
+    seconds = math.floor(timer)%60
+    if len(str(minutes)) == 1:
+        minutes = "0"+str(minutes)
+    if len(str(seconds)) == 1:
+        seconds = "0"+str(seconds)
     f = open('static/results.json', 'r')
     results = json.load(f)
-    results.append({"vards": game["username"], "punkti": game["points"]})
+    results.append({"vards": game["username"], "punkti": game["points"], "time": time.time()-game["time"], "displayTime": minutes+":"+seconds})
     f.close()
     results = sorted(results, key=lambda d: d['punkti'], reverse=True) 
     f = open('static/results.json', 'w')
@@ -225,21 +235,21 @@ def swap():
         added = fillBoard(game)
         session['board'] = game
 
-        return {"canSwap": True, "removed": removed, "added": added, "points": game["points"], "moves": game["moves"], "gameEnded":game["moves"]==0}
+        return {"canSwap": True, "removed": removed, "added": added, "points": game["points"], "moves": game["moves"], "gameEnded":game["moves"]==0, "time": time.time()-game["time"]}
 
 @app.route("/")
 def home():
     game = session.get('game')
     if not game:
         return render_template("game.html", points = 0)
-    return render_template("game.html", points = game['points'], moves = game['moves'])
+    return render_template("game.html", points = game['points'], moves = game['moves'], startTime=game["time"])
 
 @app.route("/game/")
 def game():
     game = session.get('game')
     if not game:
         return render_template("game.html", points = 0)
-    return render_template("game.html", points = game['points'], moves = game['moves'])
+    return render_template("game.html", points = game['points'], moves = game['moves'], startTime=game["time"])
 
 @app.route("/about/")
 def about():
