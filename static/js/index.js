@@ -43,7 +43,7 @@ async function endGame() {
     document.getElementById("playerName").value = "";
     gameSpace.replaceWith(gameSpace.cloneNode(true));
     window.clearAllInterval();
-    }, 3000);
+    }, 2500);
 }
 
 class Letter {
