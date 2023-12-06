@@ -81,6 +81,7 @@ def generateBoard(width, height):
     game["moves"] = DEFAULT_MOVE_COUNT
     game["points"] = 0
     game["time"] = time.time()
+    game["lastMoveTime"] = time.time()
 
     if not hasValidMoves():
         board = generateBoard()
@@ -232,10 +233,13 @@ def swap():
         if not removed:
             return {"canSwap": False}
         game["moves"] -= 1
+        if (time.time()-game["lastMoveTime"]<10):
+            game["points"]+=10-(math.floor(time.time()-game["lastMoveTime"]))
         if (game["moves"]==0):
             saveScore(game)
         added = fillBoard(game)
         session['board'] = game
+        game["lastMoveTime"]=time.time()
 
         return {"canSwap": True, "removed": removed, "added": added, "points": game["points"], "moves": game["moves"], "gameEnded":game["moves"]==0, "time": time.time()-game["time"]}
 
