@@ -174,7 +174,7 @@ class Game {
         }
 
         this.board = [];
-        this.timer = 0;
+        this.startTime = Date.now()
         for(let x = 0;x<board.width;x++){
             this.board.push([])
             this.lettersToAdd.push([]);
@@ -190,7 +190,7 @@ class Game {
     }
     
     #newGame(){
-        this.timer = 0;
+        this.startTime = Date.now()
         this.#generateNewBoard(parseInt(document.getElementById("optionThick").value), parseInt(document.getElementById("optionHeight").value));
         this.deletedLetters = []
     }
@@ -265,10 +265,9 @@ class Game {
 
 
     updateTick(){
-        let timer = document.getElementById("timer")
-        this.timer += 20;
-        let minutes = Math.floor(this.timer/1000/60);
-        let seconds = Math.floor(this.timer/1000)%60;
+        let time = Date.now()-this.startTime;;
+        let minutes = Math.floor(time/1000/60);
+        let seconds = Math.floor(time/1000)%60;
         if(seconds.toString().length == 1){
             seconds = "0"+seconds;
         }
@@ -276,10 +275,6 @@ class Game {
             minutes = "0"+minutes;
         }
         timer.innerHTML = minutes+":"+seconds;
-        this.timer += 20;
-        if(this.delay>this.timer){
-            return;
-        }
         if(!this.gameReady){
             return
         }

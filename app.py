@@ -11,6 +11,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32)
 
 DEFAULT_MOVE_COUNT = 3
+PATH = "/static"
 
 letter_posibilities = {
     "a": {"probability": 11, "points": 1},
@@ -52,7 +53,7 @@ for letter, data in letter_posibilities.items():
     for i in range(data["probability"]):
         letterPool.append([letter, data["points"]])
     
-f = open('static/words.json', encoding="utf8")
+f = open(PATH+'/words.json', encoding="utf8")
 words = json.load(f)
 f.close()
 
@@ -192,12 +193,12 @@ def saveScore(game):
         minutes = "0"+str(minutes)
     if len(str(seconds)) == 1:
         seconds = "0"+str(seconds)
-    f = open('static/results.json', 'r')
+    f = open(PATH+'/results.json', 'r')
     results = json.load(f)
     results.append({"vards": game["username"], "punkti": game["points"], "time": time.time()-game["time"], "displayTime": str(minutes)+":"+str(seconds)})
     f.close()
     results = sorted(results, key=lambda d: d['punkti'], reverse=True) 
-    f = open('static/results.json', 'w')
+    f = open(PATH+'/results.json', 'w')
     json.dump(results, f)
     f.close()
 
@@ -259,7 +260,7 @@ def about():
 
 @app.route("/results/")
 def results():
-    f = open('static/results.json', encoding="utf8")
+    f = open(PATH+'/results.json', encoding="utf8")
     result = json.load(f)
     f.close()
     return render_template("results.html", result=result)
