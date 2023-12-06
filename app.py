@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32)
 
 DEFAULT_MOVE_COUNT = 3
-PATH = "/static"
+PATH = "static"
 
 letter_posibilities = {
     "a": {"probability": 11, "points": 1},
