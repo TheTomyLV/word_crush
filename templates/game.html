@@ -13,22 +13,23 @@ Spēle
     }
 </script>
 <div class="w3-container w3-center" style="display: none" id="gameSpace">
-    <p>Time: <span id="timer">00:00</span></p>
+    <p>Laiks: <span id="timer">00:00</span></p>
     <p class="w3-cursive">Punkti: <span id="points">{{points}}</span></p>
     <p class="w3-cursive">Gājieni: <span id="moves">{{moves}}</span></p>
     <canvas id="gameCanvas" class="w3-center"></canvas>
 </div>
-<div id="startDiv" class="w3-container w3-center">
-    <input id="playerName"></input>
-    <button id="start" onclick="displayGame()">Start</button>
-    
+<div id="startDiv" class="w3-center w3-card w3-padding-16" style="width:50%;margin:auto;">
+    <label for="playerName">Vārds:</label>
+    <input class="w3-input w3-center" style="width:30%;margin:auto;" id="playerName"></input>
+
     <div class="slidecontainer">
         <label>Laukuma garums:</label>
         <input type="range" value="12" min="12" max="20" id="optionHeight" oninput="this.nextElementSibling.value = this.value">
-        <output></output></br>
+        <output>12</output></br>
         <label>Laukuma platums:</label>
         <input type="range" value="10" min="10" max="45" id="optionThick" oninput="this.nextElementSibling.value = this.value">
-        <output></output>
+        <output>10</output>
     </div>
+    <button class="w3-button w3-green" id="start" onclick="displayGame()">Start</button>
 </div>
 {% endblock %}

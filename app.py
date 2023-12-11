@@ -10,7 +10,7 @@ import secrets
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32)
 
-DEFAULT_MOVE_COUNT = 3
+DEFAULT_MOVE_COUNT = 10
 PATH = "static"
 
 letter_posibilities = {
@@ -57,11 +57,27 @@ f = open(PATH+'/words.json', encoding="utf8")
 words = json.load(f)
 f.close()
 
+def swapCharacters(s, B, C): 
+    N = len(s) 
+    # If c is greater than n 
+    C = C % N
+     
+    # Converting string to list
+    s = list(s)
+     
+    # loop to swap ith element with (i + C) % n th element 
+    for i in range(B):
+        s[i], s[(i + C) % N] = s[(i + C) % N], s[i] 
+    s = ''.join(s)
+    return s
+
 def newLetter(game):
     if not game["word"]:
         word =""
-        while len(word) != 9:
+        while len(word) < 4:
             word = random.choice(words)
+            pos = random.randint(1, len(word)-1)
+            word = swapCharacters(word, pos, pos+random.choice([1, -1]))
         game["word"] = word
     letter = game["word"][0]
     game["word"] = game["word"][1:]
@@ -103,14 +119,29 @@ def swapLetters(game, x1, y1, x2, y2):
 def shuffleBoard():
     return
 
+def score(word):
+    score = 0
+    for letter in word:
+        score += letter_posibilities[letter]["points"]
+    return score
+
 def hasWord(word):
+    valid_words = []
     for search in words:
         try:
             index = word.index(search)
-            return [index, len(search)]
+            if len(search) > 2:
+                valid_words.append([index, len(search), score(search)])
         except:
             continue
-    return -1
+    if len(valid_words) == 0:
+        return -1
+    else:
+        highest = valid_words[0]
+        for word in valid_words:
+            if word[2] > highest[2]:
+                highest = word
+        return highest
 def hasValidMoves():
     return True
 
@@ -140,28 +171,25 @@ def hasWordAt(game, x, y):
     horizontal = hasWord(horizontal)
     if horizontal != -1:
         for i in range(horizontal[1]):
-            score += letter_posibilities[board[horizontal[0]+i][y]]["points"]
             board[horizontal[0]+i][y] = ""
             changes.append([horizontal[0]+i, y])
-        game["points"] += score
+        game["points"] += horizontal[2]
         game["board"] = board
         return changes
     vertical = hasWord(vertical)
     if vertical != -1:
         for i in range(vertical[1]):
-            score += letter_posibilities[board[x][vertical[0]+i]]["points"]
             board[x][vertical[0]+i] = ""
             changes.append([x, vertical[0]+i])
-        game["points"] += score
+        game["points"] += vertical[2]
         game["board"] = board
         return changes
     diagonal = hasWord(diagonal)
     if diagonal != -1:
         for i in range(diagonal[1]):
             changes.append([x-minValue+diagonal[0]+i, y-minValue+diagonal[0]+i])
-            score += letter_posibilities[board[x-minValue+diagonal[0]+i][y-minValue+diagonal[0]+i]]["points"]
             board[x-minValue+diagonal[0]+i][y-minValue+diagonal[0]+i] = ""
-        game["points"] += score
+        game["points"] += diagonal[2]
         game["board"] = board
         return changes
     
@@ -251,12 +279,12 @@ def home():
         return render_template("game.html", points = 0, moves=DEFAULT_MOVE_COUNT)
     return render_template("game.html", points = game['points'], moves = game['moves'], startTime=game["time"])
 
-@app.route("/game/")
-def game():
-    game = session.get('game')
-    if not game:
-        return render_template("game.html", points = 0, moves=DEFAULT_MOVE_COUNT)
-    return render_template("game.html", points = game['points'], moves = game['moves'], startTime=game["time"])
+# @app.route("/game/")
+# def game():
+#     game = session.get('game')
+#     if not game:
+#         return render_template("game.html", points = 0, moves=DEFAULT_MOVE_COUNT)
+#     return render_template("game.html", points = game['points'], moves = game['moves'], startTime=game["time"])
 
 @app.route("/about/")
 def about():

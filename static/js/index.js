@@ -172,7 +172,8 @@ class Game {
         if(!board){
             return
         }
-
+        let moves = document.getElementById("moves")
+        moves.innerHTML = board.moves;
         this.board = [];
         this.startTime = Date.now()
         for(let x = 0;x<board.width;x++){
