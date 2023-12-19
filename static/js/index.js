@@ -34,7 +34,7 @@ async function postData(url = "", data = {}) {
     });
     return response.json(); // parses JSON response into native JavaScript objects
   }
-  
+
 async function endGame() {
     setTimeout(() => {
     let gameSpace = document.getElementById("gameSpace");
@@ -63,11 +63,11 @@ class Letter {
         this.color = "#D2E9E9";
         this.rotation = 0;
         this.speed = 0.01;
-        
+
     }
 
     updateTick(game, mouseOver){
-        
+
         if(game.selected && game.selected.posX == this.posX && game.selected.posY == this.posY){
             this.color = "#C4DFDF";
             this.size += (1-this.size)/10;
@@ -85,12 +85,12 @@ class Letter {
             game.board[this.posX][this.posY] = null
             this.posY += 1;
             game.board[this.posX][this.posY] = this;
-            
+
         }
-        
+
         if(this.y<this.posY){
             this.yVel+=this.speed;
-            this.y+=this.yVel;         
+            this.y+=this.yVel;
             if(this.y>this.posY){
                 this.y = this.posY;
                 this.yVel = 0;
@@ -151,11 +151,11 @@ class Game {
     gameReady = false
     lettersToAdd = []
     constructor(canvas) {
-        
+
         this.canvas = canvas;
         this.ctx = this.canvas.getContext("2d");
         this.#newGame()
-        
+
     }
 
     getMousePos() {
@@ -184,12 +184,12 @@ class Game {
                 this.lettersToAdd[x].push(board.board[x][y])
             }
         }
-        
+
         this.board.width = board.width;
         this.board.height = board.height;
         this.gameReady = true
     }
-    
+
     #newGame(){
         this.startTime = Date.now()
         this.#generateNewBoard(parseInt(document.getElementById("optionThick").value), parseInt(document.getElementById("optionHeight").value));
@@ -232,7 +232,7 @@ class Game {
                 let x = res.removed[i][0];
                 let y = res.removed[i][1];
                 word += this.board[x][y].letter;
-                
+
                 let letter = this.board[x][y]
                 letter.posX = i;
                 letter.posY = this.board.height+0.5;
@@ -244,7 +244,7 @@ class Game {
                 for(let j in res.added[i]){
                     this.lettersToAdd[i].push(res.added[i][j])
                 }
-                
+
             }
         }
     }
@@ -280,7 +280,7 @@ class Game {
             return
         }
         this.#clearCanvas();
-        
+
         this.canvas.height = this.canvas.width*(this.board.height+1)/this.board.width+30;
         let boxSize = (this.canvas.width/this.board.width);
         this.interactable = true;
@@ -331,7 +331,7 @@ class Game {
                         }
                     }
                 }
-                
+
                 this.drawLetter(letter,boxSize)
             }
         }
@@ -346,7 +346,7 @@ class Game {
             this.drawLetter(letter,boxSize)
         }
 
-        this.mouseDown = false;   
+        this.mouseDown = false;
     }
 
     #clearCanvas(){
@@ -369,11 +369,11 @@ function main() {
         game.mouseY = (evt.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
     });/*
     addEventListener("mouseup", (evt) => {
-        game.mouseDown = false;    
+        game.mouseDown = false;
     });
     addEventListener("touchend", (evt) => {
         evt.preventDefault();
-        game.mouseDown = false;    
+        game.mouseDown = false;
     });*/
     addEventListener("mousedown", (evt) => {
         game.mouseDown = true;
@@ -382,10 +382,10 @@ function main() {
         evt.preventDefault();
         game.mouseX = (evt.touches[0].clientX - rect.left) / (rect.right - rect.left) * canvas.width;
         game.mouseY = (evt.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-        game.mouseDown = true;    
+        game.mouseDown = true;
     });
     let intervalId = setInterval(function() {
         game.updateTick();
       }, 20);
-      
+
   }

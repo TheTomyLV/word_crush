@@ -3,7 +3,6 @@
 Rezultāti
 {% endblock %}
 {% block content %}
-<p>Rezultāti</p>
 <div class="w3-container">
     <table class="w3-table-all">
     <thead>
@@ -13,13 +12,13 @@ Rezultāti
         <th class="w3-right-align">Punkti</th>
       </tr>
     </thead>
-        {% for results in result %}
+    {% for result in results %}
         <tr>
-            <td><b>{{loop.index}}.</b> {{results.vards}}</td>
-            <td>{{results.displayTime}}</td>
-            <td class="w3-right-align">{{results.punkti}}</td>
+            <td><b>{{result[0]}}.</b> {{result[1]}}</td>
+            <td>{{result[2]}}</td>
+            <td class="w3-right-align">{{result[3]}}</td>
         </tr>
-        {% endfor %}
+    {% endfor %}
     </table>
   </div>
 

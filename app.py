@@ -11,12 +11,14 @@ import secrets
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32)
 
-database_Host=""
-database_Passwd=""
+database_Host="clypeum.mysql.pythonanywhere-services.com"
+database_User="Clypeum"
+database_Passwd="Degurechaff"
+database_Name="Clypeum$default"
 
 
 DEFAULT_MOVE_COUNT = 10
-PATH = "static"
+PATH = "/home/Clypeum/word_crush/static/"
 
 letter_posibilities = {
     "a": {"probability": 11, "points": 1},
@@ -57,22 +59,22 @@ letterPool = []
 for letter, data in letter_posibilities.items():
     for i in range(data["probability"]):
         letterPool.append([letter, data["points"]])
-    
-f = open(PATH+'/words.json', encoding="utf8")
+
+f = open('/home/Clypeum/word_crush/static/words.json', encoding="utf8")
 words = json.load(f)
 f.close()
 
-def swapCharacters(s, B, C): 
-    N = len(s) 
-    # If c is greater than n 
+def swapCharacters(s, B, C):
+    N = len(s)
+    # If c is greater than n
     C = C % N
-     
+
     # Converting string to list
     s = list(s)
-     
-    # loop to swap ith element with (i + C) % n th element 
+
+    # loop to swap ith element with (i + C) % n th element
     for i in range(B):
-        s[i], s[(i + C) % N] = s[(i + C) % N], s[i] 
+        s[i], s[(i + C) % N] = s[(i + C) % N], s[i]
     s = ''.join(s)
     return s
 
@@ -87,7 +89,7 @@ def newLetter(game):
     letter = game["word"][0]
     game["word"] = game["word"][1:]
     return letter
-    
+
 
 def generateBoard(width, height):
     board = []
@@ -97,7 +99,7 @@ def generateBoard(width, height):
         board.append([])
         for j in range(height):
             board[i].append(newLetter(game))
-    
+
     game["width"] = width
     game["height"] = height
     game["moves"] = DEFAULT_MOVE_COUNT
@@ -197,7 +199,7 @@ def hasWordAt(game, x, y):
         game["points"] += diagonal[2]
         game["board"] = board
         return changes
-    
+
 def fillBoard(game):
     changes = []
     for i in range(len(game["board"])):
@@ -238,7 +240,7 @@ def saveScore(game):
 
     mycursor = mydb.cursor()
 
-    values = (game["username"], game["points"], str(minutes)+":"+str(seconds))
+    values = (game["username"], str(minutes)+":"+str(seconds), game["points"])
     sql = "INSERT INTO Score (Vards, Laiks, Punkti) VALUES (%s,%s,%s)"
     mycursor.execute(sql,values)
     mydb.commit()
@@ -252,12 +254,12 @@ def newGame():
         height = args["height"]
         game = generateBoard(width, height)
         game["username"] = args["username"]
-        
+
         session['type'] = type
         session['game'] = game
 
         return game
-    
+
 
 @app.route('/swap',methods = ['POST'])
 def swap():
@@ -305,17 +307,17 @@ def about():
 @app.route("/results/")
 def results():
     mydb = mysql.connector.connect(
-    host=database_Host+".mysql.pythonanywhere-services.com",
-    user=database_Host,
+    host=database_Host,
+    user=database_User,
     passwd=database_Passwd,
-    database=database_Host+"$default"
+    database=database_Name
     )
 
     mycursor = mydb.cursor()
-    mycursor.execute("SELECT Vards, Laiks, Punkti FROM Score")
+    mycursor.execute("SELECT * FROM Score ORDER BY Punkti, Laiks")
     score=mycursor.fetchall()
     mydb.close()
-    return render_template("results.html", result=score)
+    return render_template("results.html", results=score)
 
 @app.route("/rules/")
 def rules():
