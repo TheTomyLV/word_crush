@@ -4,11 +4,16 @@ import re
 from datetime import datetime
 import time
 import math
+import mysql.connector
 
 from flask import Flask, redirect, url_for, request, render_template, session
 import secrets
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32)
+
+database_Host=""
+database_Passwd=""
+
 
 DEFAULT_MOVE_COUNT = 10
 PATH = "static"
@@ -222,14 +227,21 @@ def saveScore(game):
         minutes = "0"+str(minutes)
     if len(str(seconds)) == 1:
         seconds = "0"+str(seconds)
-    f = open(PATH+'/results.json', 'r')
-    results = json.load(f)
-    results.append({"vards": game["username"], "punkti": game["points"], "time": time.time()-game["time"], "displayTime": str(minutes)+":"+str(seconds)})
-    f.close()
-    results = sorted(results, key=lambda d: d['punkti'], reverse=True) 
-    f = open(PATH+'/results.json', 'w')
-    json.dump(results, f)
-    f.close()
+
+
+    mydb = mysql.connector.connect(
+    host=database_Host+".mysql.pythonanywhere-services.com",
+    user=database_Host,
+    passwd=database_Passwd,
+    database=database_Host+"$default"
+    )
+
+    mycursor = mydb.cursor()
+
+    values = (game["username"], game["points"], str(minutes)+":"+str(seconds))
+    sql = "INSERT INTO Score (Vards, Laiks, Punkti) VALUES (%s,%s,%s)"
+    mycursor.execute(sql,values)
+    mydb.commit()
 
 @app.route('/newGame',methods = ['POST'])
 def newGame():
@@ -292,10 +304,18 @@ def about():
 
 @app.route("/results/")
 def results():
-    f = open(PATH+'/results.json', encoding="utf8")
-    result = json.load(f)
-    f.close()
-    return render_template("results.html", result=result)
+    mydb = mysql.connector.connect(
+    host=database_Host+".mysql.pythonanywhere-services.com",
+    user=database_Host,
+    passwd=database_Passwd,
+    database=database_Host+"$default"
+    )
+
+    mycursor = mydb.cursor()
+    mycursor.execute("SELECT Vards, Laiks, Punkti FROM Score")
+    score=mycursor.fetchall()
+    mydb.close()
+    return render_template("results.html", result=score)
 
 @app.route("/rules/")
 def rules():
