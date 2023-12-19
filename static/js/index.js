@@ -39,7 +39,8 @@ async function endGame() {
     setTimeout(() => {
     let gameSpace = document.getElementById("gameSpace");
     gameSpace.style.display = "none";
-    document.getElementById("startDiv").style.display = "block";
+    document.getElementById("endScreen").style.display = "block";
+    
     document.getElementById("playerName").value = "";
     gameSpace.replaceWith(gameSpace.cloneNode(true));
     window.clearAllInterval();
@@ -224,6 +225,7 @@ class Game {
 
             let points = document.getElementById("points")
             points.innerHTML = res.points;
+            document.getElementById("endPoints").innerHTML = res.points;
             let moves = document.getElementById("moves")
             moves.innerHTML = res.moves;
             let word = ""
@@ -276,6 +278,7 @@ class Game {
             minutes = "0"+minutes;
         }
         timer.innerHTML = minutes+":"+seconds;
+        document.getElementById("endTimer").innerHTML = minutes+":"+seconds;
         if(!this.gameReady){
             return
         }
