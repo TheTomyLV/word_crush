@@ -314,7 +314,7 @@ def results():
     )
 
     mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM Score ORDER BY Punkti, Laiks")
+    mycursor.execute("SELECT * FROM Score ORDER BY Punkti DESC")
     score=mycursor.fetchall()
     mydb.close()
     return render_template("results.html", results=score)
