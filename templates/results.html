@@ -14,7 +14,7 @@ Rezultāti
     </thead>
     {% for result in results %}
         <tr>
-            <td><b>{{result[0]}}.</b> {{result[1]}}</td>
+            <td><b>{{loop.index}}.</b> {{result[1]}}</td>
             <td>{{result[2]}}</td>
             <td class="w3-right-align">{{result[3]}}</td>
         </tr>
