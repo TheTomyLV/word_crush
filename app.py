@@ -11,14 +11,14 @@ import secrets
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes(32)
 
-database_Host="clypeum.mysql.pythonanywhere-services.com"
-database_User="Clypeum"
-database_Passwd="Degurechaff"
-database_Name="Clypeum$default"
+database_Host=""
+database_User=""
+database_Passwd=""
+database_Name=""
 
 
 DEFAULT_MOVE_COUNT = 10
-PATH = "/home/Clypeum/word_crush/static/"
+PATH = "static/"
 
 letter_posibilities = {
     "a": {"probability": 11, "points": 1},
@@ -60,7 +60,7 @@ for letter, data in letter_posibilities.items():
     for i in range(data["probability"]):
         letterPool.append([letter, data["points"]])
 
-f = open('/home/Clypeum/word_crush/static/words.json', encoding="utf8")
+f = open(PATH+'words.json', encoding="utf8")
 words = json.load(f)
 f.close()
 
@@ -232,10 +232,10 @@ def saveScore(game):
 
 
     mydb = mysql.connector.connect(
-    host=database_Host+".mysql.pythonanywhere-services.com",
+    host=database_Host,
     user=database_Host,
     passwd=database_Passwd,
-    database=database_Host+"$default"
+    database=database_Host
     )
 
     mycursor = mydb.cursor()
